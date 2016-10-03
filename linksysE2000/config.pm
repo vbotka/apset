@@ -1,0 +1,20 @@
+package config;
+
+$debug="1";
+$ap="192.168.102.8";
+$ssid_2g="linksysE2000-2.4g";
+$ssid_5g="linksysE2000-5g";
+$EAP_Server="192.168.102.20";
+$EAP_Auth_Port="1812";
+$EAP_Secret="sharedsecret";
+$channel_2g="11";
+$channel_5g="149";
+$default_mode="G-ONLY";
+$default_auth="open";
+$KEYVALUE1="1111000000";
+$KEYVALUE2="2222000000";
+$KEYVALUE3="11112222333344445555666611";
+$KEYVALUE4="12345678901234567890123456";
+$psk_key="sharedsecret";
+$AP_Login="root";
+$AP_Password="admin";

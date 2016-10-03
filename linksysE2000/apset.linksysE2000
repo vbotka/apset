@@ -1,0 +1,308 @@
+#! /usr/bin/perl
+
+use FindBin;
+use lib $FindBin::Bin;
+
+use function;
+use config;
+
+sub user_man
+{
+        print "Set parameters of Linksys E2000 \n\n";
+	print "Usage:  apset [OPTIONS]\n\n";
+	print " OPTIONS:\n";
+	print " --reset                                                       \n";
+	print " --reboot                                                      \n";
+	print " --uptime                                                      \n";
+	print "                                                               \n";
+	print " [MODE]          G-ONLY|N2.4-ONLY|N5-ONLY                      \n";
+	print "                 NA-MIXED|NG-MIXED                             \n";
+	print "                 not implemented: A-ONLY|B-ONLY                \n";
+	print "                 not implemented: BG-MIXED                     \n";
+	print " [CHANNEL]       1 - 11; 36 - 64 ;                 note:0=auto \n";
+	print " [CHANNEL-WIDTH] 0,10,20,40                        note:0=auto \n";
+	print " [SSID]          <SSID>	                                      \n";
+	print " [BCAST]         enable|disable                                \n";
+	print " [RATE]          0|1|2|5.5|6|9|11|12|18|24|36|48|54 note:0=auto\n";
+	print " [BEACON]        10 - 65535, 100 default                       \n";
+	print " [DTIM]          1 - 255, 1 default                            \n";
+	print " [RTS]           0 - 2347, 2347 default                        \n";
+	print " [FRAG]          256 - 2346, 2346 default                      \n";
+	print " [QOS]           on|off                                        \n";
+        print " [WEP]           enable|disable              note:disable=open \n";
+	print " [ENCRYPT]       64|128                                        \n";
+	print " [KEYIDX]        1 - 4, 1 default                              \n";
+	print " [KEY1]          <KEY1>                                        \n";
+	print " [KEY2]          <KEY2>                                        \n";
+	print " [KEY3]          <KEY3>                                        \n";
+	print " [KEY4]          <KEY4>                                        \n";
+        print " [AUTH]          disable|open                note:disable=open \n";
+        print "                 wep                                           \n";
+        print "                 wpa|wpa2|psk|psk2|                            \n";
+	print "                 psk-psk2|wpa-wpa2|radius                      \n";
+	print " [CRYPTO]        aes|tkip|tkip+aes                             \n";
+	print " [RADIUS-IP]     <ip of the radius server>                     \n";
+	print " [RADIUS-SECRET] <secret of the radius server>                 \n";
+        exit 1;
+}
+
+unless(@ARGV){
+	user_man;
+}
+
+my(@array)= @ARGV;
+
+$size= scalar @ARGV;
+
+function::connect;
+
+for ($i = 0; $i < $size;  $i++){
+
+	if (@array[$i] eq "--reboot"){
+	    function::reboot;
+	    exit 0;
+        }
+
+	if (@array[$i] eq "--reset"){
+	    function::reset;
+	    function::commit;
+	    function::reboot;
+	    exit 0;
+	}
+
+	if (@array[$i] eq "--uptime"){
+	    function::uptime;
+	    function::disconnect;
+	    exit 0;
+	}
+
+	if (@array[$i] eq "MODE"){
+		$i++;
+		$err=1;
+		if (@array[$i] eq "A-ONLY")    { $err=0; }
+		if (@array[$i] eq "B-ONLY")    { $err=0; }
+		if (@array[$i] eq "G-ONLY")    { $err=0; }
+		if (@array[$i] eq "N2.4-ONLY") { $err=0; }
+		if (@array[$i] eq "N5-ONLY")   { $err=0; }
+		if (@array[$i] eq "BG-MIXED")  { $err=0; }
+		if (@array[$i] eq "NG-MIXED")  { $err=0; }
+		if (@array[$i] eq "NA-MIXED")  { $err=0; }
+		if ($err) {
+		    print "\nERROR: MODE @array[$i] not implemented";
+		}
+		else {
+		    function::mode(@array[$i]);
+		}
+	}
+
+	if (@array[$i] eq "CHANNEL"){
+		$i++;
+		function::channel(@array[$i]);
+        }
+
+	if (@array[$i] eq "BEACON"){
+		$i++;
+		function::beacon(@array[$i]);
+        }
+
+	if (@array[$i] eq "DTIM"){
+		$i++;
+		function::dtim(@array[$i]);
+        }
+
+       if (@array[$i] eq "FRAG"){
+	   $i++;
+		function::frag(@array[$i]);
+        }
+
+	if (@array[$i] eq "CHANNEL-WIDTH"){
+                $i++;
+                function::channelwidth@array[$i];
+        }
+
+	if (@array[$i] eq "SSID"){
+		$i++;
+		function::ssid(@array[$i]);
+	}
+
+# TODO
+        if (@array[$i] eq "NOSSID"){
+                print "\nTODO: setting NOSSID.";
+		$i++;
+                $nossid=1;
+                $ssid=@array[$i];
+        }
+
+	if (@array[$i] eq "BCAST"){
+		$i++;
+		$err=1;
+		if (@array[$i] eq "enable") { $err=0; }
+		if (@array[$i] eq "disable") { $err=0; }
+		if ($err) {
+		    print "\nERROR: BCAST @array[$i] not implemented";
+		}
+		else {
+		    function::bcast(@array[$i]);
+		}
+	}
+
+        if (@array[$i] eq "RATE"){
+		$i++;
+		function::rate(@array[$i]);
+        }
+
+       if (@array[$i] eq "WEP"){
+	   $i++;
+	   $err=1;
+	   if (@array[$i] eq "disable")  { 
+	       $err=0;
+	       $hasauth=0;
+	       function::auth("disable");
+	   }
+	   if (@array[$i] eq "enable")  { 
+	       $err=0;
+	       $hasauth=1;
+	       function::auth("wep");
+	   }
+	   if ($err) { print "\nERROR: WEP @array[$i] not implemented"; }
+       }
+
+       if (@array[$i] eq "AUTH"){
+	   $i++;
+	   $hasauth=1;
+	   $err=1;
+	   @array[$i]=~tr/A-Z/a-z/;
+	   if (@array[$i] eq "disable")  { $err=0; }
+	   if (@array[$i] eq "open")  { $err=0; } # alias disabled
+	   if (@array[$i] eq "wep")  { $err=0; }
+	   if (@array[$i] eq "shared")  { $err=0; } # alias wep
+	   if (@array[$i] eq "psk")  { $err=0; }
+	   if (@array[$i] eq "psk2")  { $err=0; }
+	   if (@array[$i] eq "wpa")  { $err=0; }
+	   if (@array[$i] eq "wpa2")  { $err=0; }
+	   if (@array[$i] eq "psk_psk2")  { $err=0; }
+	   if (@array[$i] eq "wpa_wpa2")  { $err=0; }
+	   if (@array[$i] eq "radius")  { $err=0; }
+	   if ($err) {
+	       print "\nERROR: AUTH @array[$i] not implemented";
+	   }
+	   else {
+	       function::auth(@array[$i]);
+	   }
+       }
+
+        if (@array[$i] eq "ENCRYPT"){
+                $i++;
+		$err=1;
+		if (@array[$i] eq "64")    { $err=0; }
+		if (@array[$i] eq "128")    { $err=0; }
+		if ($err) {
+		    print "\nERROR: ENCRYPT @array[$i] not implemented";
+		}
+		else {
+		    function::encrypt(@array[$i]);
+		}
+        }
+
+        if (@array[$i] eq "KEYIDX"){
+                $i++;
+		$err=1;
+		if (@array[$i] eq "1")    { $err=0; }
+		if (@array[$i] eq "2")    { $err=0; }
+		if (@array[$i] eq "3")    { $err=0; }
+		if (@array[$i] eq "4")    { $err=0; }
+		if ($err) {
+		    print "\nERROR: KEYIDX @array[$i] not implemented";
+		}
+		else {
+		    function::keyidx(@array[$i]);
+		}
+        }
+
+        if (@array[$i] eq "KEY1"){
+                $i++;
+                function::key(1,@array[$i]);
+        }
+        if (@array[$i] eq "KEY2"){
+                $i++;
+                function::key(2,@array[$i]);
+        }
+        if (@array[$i] eq "KEY3"){
+                $i++;
+                function::key(3,@array[$i]);
+        }
+        if (@array[$i] eq "KEY4"){
+                $i++;
+                function::key(4,@array[$i]);
+        }
+
+	if ((@array[$i] eq "CRYPTO") || (@array[$i] eq "WPA-CRYPTO")){
+	    $i++;
+	    @array[$i]=~tr/A-Z/a-z/;
+	    if (@array[$i] eq "tkip")  { $err=0; }
+	    if (@array[$i] eq "aes")  { $err=0; }
+	    if (@array[$i] eq "tkip+aes")  { $err=0; }
+	    if ($err) {
+		print "\nERROR: CRYPTO @array[$i] not implemented";
+	    }
+	   else {
+	       function::crypto(@array[$i]);
+	   }
+	}
+
+	if (@array[$i] eq "RADIUS-IP"){
+	    $i++;
+	    function::radiusip(@array[$i]);
+        }
+
+	if (@array[$i] eq "RADIUS-SECRET"){
+	    $i++;
+	    function::radiussecret(@array[$i]);
+        }
+}
+
+if ($hasauth eq 1){
+    print "\nTODO: checking security settings.";
+#   function::checksec();
+}
+
+if ($haswep eq 1){
+    print "\nTODO: checking wep.";
+#   function::checkwep($mode);
+}
+ 
+if ($haskey eq 1){
+    print "\nTODO: checking key.";
+#	function::keyset(rem,$mode,$activekeyindex,$keymode,$key);
+#	function::keyset(add,$mode,$activekeyindex,$keymode,$key);
+}
+
+if ($haswpa eq 1){
+    print "\nTODO: checking wpa.";
+#   function::setwpa($mode, $ssid, $cipher);
+}
+
+if ($haspsk eq 1){
+    print "\nTODO: checking psk.";
+#	function::setpsk($mode, $ssid, $cipher);
+}
+if ($has8021x eq 1){
+    print "\nTODO: checking 80211x.";
+#        function::set8021x($mode, $ssid, $cipher);
+}
+
+if ($haschan eq 1){
+    print "\nTODO: checking channel.";
+#	function::chanset($mode, $channel);
+}
+
+if ($haschanwidth eq 1){
+    print "\nTODO: checking channel width.";
+#        function::chanwidth($mode, $channelwidth);
+}
+
+# final commit and disconnect
+function::commit;
+function::reboot;
+
+print "\nExit. \n";
