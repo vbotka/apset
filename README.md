@@ -1,9 +1,8 @@
 apset
 =====
 
-Manage AP without CLI interface with [Wifi-test](https://wireless.wiki.kernel.org/en/developers/Testing/wifi-test) project.
-												 
-
+Manage [OpenWrt](https://openwrt.org/) enabled AP with [Wifi-test](https://wireless.wiki.kernel.org/en/developers/Testing/wifi-test) project.
+							 
 License
 -------
 
