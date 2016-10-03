@@ -1,7 +1,7 @@
 apset
 =====
 
-Manage [OpenWrt](https://openwrt.org/) enabled AP with [Wifi-test](https://wireless.wiki.kernel.org/en/developers/Testing/wifi-test) project.
+Manage [DD-WRT](http://www.dd-wrt.com/site/index) enabled AP with [Wifi-test](https://wireless.wiki.kernel.org/en/developers/Testing/wifi-test) project.
 							 
 License
 -------
